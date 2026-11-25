@@ -10,14 +10,9 @@ pipeline {
     }
 
     stages {
-        stage('Nettoyage Workspace') {
+        stage('Clonage SCM') {
             steps {
-                deleteDir()
-            }
-        }
-        stage('Clonage') {
-            steps {
-                git branch: 'main', url: "${REPO_URL}"
+                echo 'Code recupere depuis GitHub via Pipeline script from SCM'
             }
         }
         stage('Verification Python') {
