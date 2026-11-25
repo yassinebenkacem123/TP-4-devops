@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+
+    environment {
+        REPO_URL = 'https://github.com/yassinebenkacem123/TP-4-devops.git'
+        NEXUS_URL = 'http://localhost:8081/repository/python-release/Release.zip'
+        NEXUS_USER = 'admin'
+        NEXUS_PASSWORD = 'f56fcb51-7248-4450-8a4e-b9f854e48619'
+    }
+
+    stages {
+        stage('Nettoyage Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+        stage('Clonage') {
+            steps {
+                git branch: 'main', url: "${REPO_URL}"
+            }
+        }
+        stage('Verification Python') {
+            steps {
+                bat 'python --version'
+                bat 'python -m pip --version'
+            }
+        }
+        stage('Installation des dependances') {
+            steps {
+                bat 'python -m pip install -r requirements.txt'
+            }
+        }
+        stage('Analyse qualite du code (Pylint)') {
+            steps {
+                bat 'python -m pylint calculator.py || exit /b 0'
+            }
+        }
+        stage('Tests unitaires') {
+            steps {
+                bat 'python -m pytest --ignore=Release'
+            }
+        }
+        stage('Creation de l artefact') {
+            steps {
+                bat '''
+                if exist Release rmdir /S /Q Release
+                if exist Release.zip del Release.zip
+                mkdir Release
+                copy calculator.py Release
+                copy test_calculator.py Release
+                copy requirements.txt Release
+                powershell Compress-Archive -Path Release\\* -DestinationPath Release.zip -Force
+                '''
+            }
+        }
+        stage('Publication de l artefact') {
+            steps {
+                bat '''
+                curl -v -u %NEXUS_USER%:%NEXUS_PASSWORD% --upload-file Release.zip %NEXUS_URL%
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline termine'
+        }
+        success {
+            echo 'BUILD SUCCESS'
+        }
+        failure {
+            echo 'BUILD FAILED'
+        }
+    }
+}

@@ -1,0 +1,150 @@
+pipeline {
+    agent any
+
+    environment {
+        NEXUS_URL = 'http://localhost:8081/repository/python-release/Release.zip'
+        NEXUS_USER = 'admin'
+        NEXUS_PASSWORD = 'f56fcb51-7248-4450-8a4e-b9f854e48619'
+    }
+
+    stages {
+        stage('Nettoyage du Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+        stage('Telechargement de la Release') {
+            steps {
+                bat 'curl -u %NEXUS_USER%:%NEXUS_PASSWORD% -o Release.zip %NEXUS_URL%'
+            }
+        }
+        stage('Verification du telechargement') {
+            steps {
+                bat '''
+                if not exist Release.zip (
+                    echo ERREUR : Release.zip introuvable
+                    exit /b 1
+                )
+                dir
+                '''
+            }
+        }
+        stage('Decompression de la Release') {
+            steps {
+                bat '''
+                if exist Release rmdir /S /Q Release
+                powershell Expand-Archive -Path Release.zip -DestinationPath Release -Force
+                '''
+            }
+        }
+        stage('Deploiement DEV') {
+            steps {
+                bat '''
+                if not exist C:\\DEV mkdir C:\\DEV
+                xcopy Release C:\\DEV /E /Y
+                '''
+            }
+        }
+        stage('Verification DEV') {
+            steps {
+                bat '''
+                echo ===== CONTENU DEV ====
+                dir C:\\DEV
+                if exist C:\\DEV\\calculator.py (
+                    python C:\\DEV\\calculator.py
+                )
+                '''
+            }
+        }
+        stage('Deploiement TEST') {
+            steps {
+                bat '''
+                if not exist C:\\TEST mkdir C:\\TEST
+                xcopy Release C:\\TEST /E /Y
+                '''
+            }
+        }
+        stage('Tests fonctionnels') {
+            steps {
+                bat '''
+                if exist C:\\TEST\\test_calculator.py (
+                    python C:\\TEST\\test_calculator.py
+                ) else (
+                    echo Aucun test fonctionnel trouve.
+                )
+                '''
+            }
+        }
+        stage('Deploiement UAT') {
+            steps {
+                bat '''
+                if not exist C:\\UAT mkdir C:\\UAT
+                xcopy Release C:\\UAT /E /Y
+                '''
+            }
+        }
+        stage('Verification UAT') {
+            steps {
+                bat '''
+                echo ===== CONTENU UAT ====
+                dir C:\\UAT
+                if exist C:\\UAT\\calculator.py (
+                    python C:\\UAT\\calculator.py
+                )
+                '''
+            }
+        }
+        stage('Deploiement STAGING') {
+            steps {
+                bat '''
+                if not exist C:\\STAGING mkdir C:\\STAGING
+                xcopy Release C:\\STAGING /E /Y
+                '''
+            }
+        }
+        stage('Verification STAGING') {
+            steps {
+                bat '''
+                echo ===== CONTENU STAGING ====
+                dir C:\\STAGING
+                if exist C:\\STAGING\\calculator.py (
+                    python C:\\STAGING\\calculator.py
+                )
+                '''
+            }
+        }
+        stage('Deploiement PRODUCTION') {
+            steps {
+                bat '''
+                if not exist C:\\PRODUCTION mkdir C:\\PRODUCTION
+                xcopy Release C:\\PRODUCTION /E /Y
+                '''
+            }
+        }
+        stage('Verification PRODUCTION') {
+            steps {
+                bat '''
+                echo ===== CONTENU PRODUCTION ====
+                dir C:\\PRODUCTION
+                if exist C:\\PRODUCTION\\calculator.py (
+                    python C:\\PRODUCTION\\calculator.py
+                )
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deploiement reussi avec succes'
+            echo '==================================='
+        }
+        failure {
+            echo 'Le pipeline a echec.'
+            echo 'Verifier les logs Jenkins.'
+        }
+        always {
+            archiveArtifacts artifacts: 'Release.zip', fingerprint: true
+        }
+    }
+}
