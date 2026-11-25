@@ -12,7 +12,8 @@ pipeline {
     stages {
         stage('Clonage SCM') {
             steps {
-                echo 'Code recupere depuis GitHub via Pipeline script from SCM'
+                checkout scm
+                bat 'dir'
             }
         }
         stage('Verification Python') {
