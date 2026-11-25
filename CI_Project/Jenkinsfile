@@ -18,43 +18,39 @@ pipeline {
         }
         stage('Verification Python') {
             steps {
-                bat "${PYTHON} --version"
-                bat "${PYTHON} -m pip --version"
+                bat "cd CI_Project && ${PYTHON} --version"
+                bat "cd CI_Project && ${PYTHON} -m pip --version"
             }
         }
         stage('Installation des dependances') {
             steps {
-                bat "${PYTHON} -m pip install -r requirements.txt"
+                bat "cd CI_Project && ${PYTHON} -m pip install -r requirements.txt"
             }
         }
         stage('Analyse qualite du code (Pylint)') {
             steps {
-                bat "${PYTHON} -m pylint calculator.py || exit /b 0"
+                bat "cd CI_Project && ${PYTHON} -m pylint calculator.py || exit /b 0"
             }
         }
         stage('Tests unitaires') {
             steps {
-                bat "${PYTHON} -m pytest --ignore=Release"
+                bat "cd CI_Project && ${PYTHON} -m pytest --ignore=Release"
             }
         }
         stage('Creation de l artefact') {
             steps {
-                bat '''
-                if exist Release rmdir /S /Q Release
-                if exist Release.zip del Release.zip
-                mkdir Release
-                copy calculator.py Release
-                copy test_calculator.py Release
-                copy requirements.txt Release
-                powershell Compress-Archive -Path Release\\* -DestinationPath Release.zip -Force
-                '''
+                bat "cd CI_Project && if exist Release rmdir /S /Q Release"
+                bat "cd CI_Project && if exist Release.zip del Release.zip"
+                bat "cd CI_Project && mkdir Release"
+                bat "cd CI_Project && copy calculator.py Release"
+                bat "cd CI_Project && copy test_calculator.py Release"
+                bat "cd CI_Project && copy requirements.txt Release"
+                bat "cd CI_Project && powershell Compress-Archive -Path Release\\\\* -DestinationPath Release.zip -Force"
             }
         }
         stage('Publication de l artefact') {
             steps {
-                bat '''
-                curl -v -u %NEXUS_USER%:%NEXUS_PASSWORD% --upload-file Release.zip %NEXUS_URL%
-                '''
+                bat "cd CI_Project && curl -v -u %NEXUS_USER%:%NEXUS_PASSWORD% --upload-file Release.zip %NEXUS_URL%"
             }
         }
     }
