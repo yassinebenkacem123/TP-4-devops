@@ -51,7 +51,7 @@ pipeline {
                 echo ===== CONTENU DEV ====
                 dir C:\\DEV
                 if exist C:\\DEV\\calculator.py (
-                    python C:\\DEV\\calculator.py
+                    "C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" C:\\DEV\\calculator.py
                 )
                 '''
             }
@@ -68,7 +68,7 @@ pipeline {
             steps {
                 bat '''
                 if exist C:\\TEST\\test_calculator.py (
-                    python C:\\TEST\\test_calculator.py
+                    "C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" C:\\TEST\\test_calculator.py
                 ) else (
                     echo Aucun test fonctionnel trouve.
                 )
@@ -89,7 +89,7 @@ pipeline {
                 echo ===== CONTENU UAT ====
                 dir C:\\UAT
                 if exist C:\\UAT\\calculator.py (
-                    python C:\\UAT\\calculator.py
+                    "C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" C:\\UAT\\calculator.py
                 )
                 '''
             }
@@ -108,7 +108,7 @@ pipeline {
                 echo ===== CONTENU STAGING ====
                 dir C:\\STAGING
                 if exist C:\\STAGING\\calculator.py (
-                    python C:\\STAGING\\calculator.py
+                    "C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" C:\\STAGING\\calculator.py
                 )
                 '''
             }
@@ -127,7 +127,7 @@ pipeline {
                 echo ===== CONTENU PRODUCTION ====
                 dir C:\\PRODUCTION
                 if exist C:\\PRODUCTION\\calculator.py (
-                    python C:\\PRODUCTION\\calculator.py
+                    "C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" C:\\PRODUCTION\\calculator.py
                 )
                 '''
             }

@@ -21,23 +21,23 @@ pipeline {
         }
         stage('Verification Python') {
             steps {
-                bat 'python --version'
-                bat 'python -m pip --version'
+                bat '"C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" --version'
+                bat '"C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" -m pip --version'
             }
         }
         stage('Installation des dependances') {
             steps {
-                bat 'python -m pip install -r requirements.txt'
+                bat '"C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" -m pip install -r requirements.txt'
             }
         }
         stage('Analyse qualite du code (Pylint)') {
             steps {
-                bat 'python -m pylint calculator.py || exit /b 0'
+                bat '"C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" -m pylint calculator.py || exit /b 0'
             }
         }
         stage('Tests unitaires') {
             steps {
-                bat 'python -m pytest --ignore=Release'
+                bat '"C:\Users\PC\AppData\Local\Programs\Python\Python311\python.exe" -m pytest --ignore=Release'
             }
         }
         stage('Creation de l artefact') {
